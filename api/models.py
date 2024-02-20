@@ -26,12 +26,24 @@ class User(db.Model):
     username = db.Column(db.String(50), unique = True, nullable = False)
     email = db.Column(db.String(50), unique=True,nullable =  False)
     password = db.Column(db.String(50), nullable = False)
+    tweets = db.relationship('Tweet', back_populates='user', lazy=True)
+    likes = db.relationship('Like', back_populates='user', nullable=False)
+    retweets = db.relationship('Retweet', back_populates='retweeter', nullable=False)
+    shares = db.relationship('Share', back_populates='sharer', nullable=False)
+    comments = db.relationship('Comment', back_populates='commenter', nullabale=False)
+    
 
 class Tweet(db.Model):
     __tablename__ = 'tweets'
 
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False )
+    user = db.relationship('User', back_populates='tweets', lazy=True)
+    
+
+
+
 
 class like(db.Model):
     __tablename__ = 'likes'
@@ -56,6 +68,5 @@ class Comment(db.Model):
 
 class Follow(db.Model):
     __tablename__ = 'follows'
-
 
     id = db.Column(db.Integer, primary_key=True)
