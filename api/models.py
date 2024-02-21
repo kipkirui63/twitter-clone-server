@@ -34,7 +34,13 @@ class User(db.Model):
     followers = db.relationship('Follow', foreign_keys='Follow.followed_id', back_populates='followed', lazy='dynamic')
     following = db.relationship('Follow', foreign_keys='Follow.follower_id', back_populates='follower', lazy='dynamic')
 
-    
+    __table_args = (
+        UniqueConstraint('username', name='username_unique_constraint'),
+        UniqueConstraint('email',name='email_unique_constraint')
+    ) 
+
+    def __repr__(self):
+        return f'id={self.id}, username={self.username}, email={self.email}'
 
 class Tweet(db.Model):
     __tablename__ = 'tweets'
@@ -60,6 +66,11 @@ class Like(db.Model):
     user = db.relationship('User', back_populates='likes')
     tweet_id = db.relationship('Tweet', back_populates='likes')
 
+
+    __table_args__ = (
+        UniqueConstraint('user_id',name='user_id_unique_contraint'),
+        UniqueConstraint('tweet_id',name='tweet_id_unique_constraint')
+    )
 
 class Retweet(db.Model):
     __tablename__ = 'retweets'
