@@ -27,10 +27,13 @@ class User(db.Model):
     email = db.Column(db.String(50), unique=True,nullable =  False)
     password = db.Column(db.String(50), nullable = False)
     tweets = db.relationship('Tweet', back_populates='user', lazy=True)
-    likes = db.relationship('Like', back_populates='user', nullable=False)
-    retweets = db.relationship('Retweet', back_populates='retweeter', nullable=False)
-    shares = db.relationship('Share', back_populates='sharer', nullable=False)
-    comments = db.relationship('Comment', back_populates='commenter', nullabale=False)
+    likes = db.relationship('Like', back_populates='user')
+    retweets = db.relationship('Retweet', back_populates='retweeter')
+    shares = db.relationship('Share', back_populates='sharer')
+    comments = db.relationship('Comment', back_populates='commenter')
+    followers = db.relationship('Follow', foreign_keys='Follow.followed_id', back_populates='followed', lazy='dynamic')
+    following = db.relationship('Follow', foreign_keys='Follow.follower_id', back_populates='follower', lazy='dynamic')
+
     
 
 class Tweet(db.Model):
@@ -38,35 +41,67 @@ class Tweet(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False )
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False )
     user = db.relationship('User', back_populates='tweets', lazy=True)
-    
+    likes = db.relationship('Like', back_populates='tweet', lazy=True)
+    retweets = db.relationship('Retweet', back_populates='original_tweet', lazy=True)
+    shares = db.relationship('Share', back_populates='original_tweet', lazy=True)
+    comments = db.relationship('Comment', back_populates='tweet', lazy=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 
 
-
-class like(db.Model):
+class Like(db.Model):
     __tablename__ = 'likes'
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    tweet_id = db.Column(db.Integer, db.ForeignKey('tweets.id'))
+    user = db.relationship('User', back_populates='likes')
+    tweet_id = db.relationship('Tweet', back_populates='likes')
 
 
-class retweet(db.Model):
+class Retweet(db.Model):
+    __tablename__ = 'retweets'
+
     id = db.Column(db.Integer, primary_key=True)
+    original_tweet_id = db.Column(db.Integer, db.ForeignKey('tweets.id'), nullable=False)
+    tetweeter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    original_tweet = db.Column(db.Integer, back_populates='retweets')
+    retweeter = db.relationship('User', back_populates='retweets')
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
 
 
 class Share(db.Model):
     __tablename__ = 'shares'
 
     id = db.Column(db.Integer, primary_key=True)
+    original_tweet_id = db.Column(db.Integer, db.ForeignKey('tweets.id'), nullable=False)
+    sharer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    original_tweet = db.relationship('Tweet', back_populates='shares')
+    sharer = db.relationship('User', back_populates='shares')
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
 
 class Comment(db.Model):
     __tablename__ = 'comments'
 
     id = db.Column(db.Integer, primary_key=True)
+    tweet_id = db.Column(db.Integer, db.ForeignKey('tweets.id'), nullable=False)
+    commenter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    tweet = db.relationship('Tweet', back_populates='comments')
+    commenter = db.relationship('User', back_populates='comments')
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
 
 
 class Follow(db.Model):
     __tablename__ = 'follows'
 
     id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    follower = db.relationship('User', foreign_keys=[follower_id], back_populates='following')
+    followed = db.relationship('User', foreign_keys=[followed_id], back_populates='followers')
