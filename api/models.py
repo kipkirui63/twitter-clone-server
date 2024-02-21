@@ -64,12 +64,14 @@ class Like(db.Model):
 class Retweet(db.Model):
     __tablename__ = 'retweets'
 
+
     id = db.Column(db.Integer, primary_key=True)
     original_tweet_id = db.Column(db.Integer, db.ForeignKey('tweets.id'), nullable=False)
-    tetweeter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    original_tweet = db.Column(db.Integer, back_populates='retweets')
+    retweeter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    original_tweet = db.relationship('Tweet', back_populates='retweets')
     retweeter = db.relationship('User', back_populates='retweets')
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
 
 
 
