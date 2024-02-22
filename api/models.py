@@ -72,6 +72,9 @@ class Like(db.Model):
         UniqueConstraint('tweet_id',name='tweet_id_unique_constraint')
     )
 
+    def ___repr__(self):
+        return f'id={self.id},user_id={self.user_id},tweet_id={self.tweet_id}'
+
 class Retweet(db.Model):
     __tablename__ = 'retweets'
 
